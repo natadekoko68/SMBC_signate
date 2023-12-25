@@ -203,7 +203,7 @@ def processing():
     df = boroname(df)
     df = boro_ct(df)
     df = zip_city(df)
-    df = select_columns(df, 13)
+    df = select_columns(df, np.inf)
     return df
 
 
@@ -235,7 +235,7 @@ def output(df_concat):
     pred = model.predict(x_test)
 
     sample_submit = open_sub()
-    sample_submit[1] = pred
+    sample_submit[1] = pred.astype(int)
     pred2 = pred.tolist()
     print(f"sub0:{pred2.count(0)}")
     print(f"sub1:{pred2.count(1)}")
@@ -246,4 +246,4 @@ def output(df_concat):
 if __name__ == "__main__":
     df_concat = processing()
     RFC(df_concat)
-    # output(df_concat)
+    output(df_concat)

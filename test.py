@@ -156,8 +156,9 @@ def nta(df):
 
 
 def nta_name(df):
-    nta_name_labels = LabelEncoder()
-    df["nta_name"] = nta_name_labels.fit_transform(df["nta_name"])
+    # nta_name_labels = LabelEncoder()
+    # df["nta_name"] = nta_name_labels.fit_transform(df["nta_name"])
+    df = df.drop("nta_name", axis=1)
     return df
 
 
@@ -183,7 +184,10 @@ def select_columns(df,num):
             print(f"{col} is dropped!")
     return df
 
-def processing(df):
+def processing():
+    train = open_train()
+    test = open_test()
+    df = concat_train_test(train, test)
     df = get_ymd(df)
     df = curb_loc(df)
     df = steward(df)
@@ -240,9 +244,6 @@ def output(df_concat):
 
 
 if __name__ == "__main__":
-    train = open_train()
-    test = open_test()
-    df_concat = concat_train_test(train, test)
-    df_concat = processing(df_concat)
+    df_concat = processing()
     RFC(df_concat)
     # output(df_concat)

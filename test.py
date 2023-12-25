@@ -74,16 +74,41 @@ def print_unique(df, key):
     print(df[key].isna().sum() / len(df[key]))
 
 
+def tree_dbh(df):
+    df["tree_dbh"] //= 10
+    return df
+
+
+def health(df):
+    df["health"] = df["health"].replace({0: "Fair",
+                                         1: "Good",
+                                         2: "Poor"})
+    df["health"] = df["health"].replace({"Poor": 0, "Fair": 1, "Good": 2})
+    return df
+
+
 def steward(df):
-    steward_labels = LabelEncoder()
+    # steward_labels = LabelEncoder()
     df.loc[df["steward"].isna(), "steward"] = "non"
-    df["steward"] = steward_labels.fit_transform(df["steward"])
+    df = df.replace({'steward': {'3or4': 3,
+                                 "non": 0,
+                                 "1or2": 1,
+                                 "4orMore": 4}})
+    # df["steward"] = steward_labels.fit_transform(df["steward"])
+    return df
+
+
+def staff(df):
+    df["staff"] = df["user_type"].replace({'Volunteer': False,
+                                           'NYC Parks Staff': True,
+                                           'TreesCount Staff': False
+                                           })
     return df
 
 
 def guards(df):
     guard_labels = LabelEncoder()
-    df.loc[df["guards"].isna(), "guards"] = "non"
+    df.loc[df["guards"].isna(), "guards"] = "Unsure"
     df["guards"] = guard_labels.fit_transform(df["guards"])
     return df
 
@@ -148,6 +173,31 @@ def spc_latin(df):
     return df
 
 
+def season(df):
+    if "created_month" not in df.columns:
+        return df
+    else:
+        df["season"] = df["created_month"].replace({1: "Winter",
+                                                    2: "Winter",
+                                                    3: "Spring",
+                                                    4: "Spring",
+                                                    5: "Spring",
+                                                    6: "Spring",
+                                                    7: "Summer",
+                                                    8: "Summer",
+                                                    9: "Autumn",
+                                                    10: "Autumn",
+                                                    11: "Autumn",
+                                                    12: "Winter"})
+        df["season"] = df["season"].replace({"Autumn": 0,
+                                             "Winter": 1,
+                                             "Spring": 2,
+                                             "Summer": 3,
+                                             })
+        df = df.drop("created_month", axis=1)
+        return df
+
+
 def nta(df):
     df["nta"] = df["nta"].str[:2]
     nta_labels = LabelEncoder()
@@ -167,6 +217,7 @@ def boroname(df):
     df["boroname"] = boroname_labels.fit_transform(df["boroname"])
     return df
 
+
 def boro_ct(df):
     df["boro_ct"] //= 1000000
     return df
@@ -177,34 +228,92 @@ def zip_city(df):
     df["zip_city"] = zip_city_labels.fit_transform(df["zip_city"])
     return df
 
-def select_columns(df,num):
-    for col in df.columns:
-        if len(df[col].unique()) >= num:
-            df = df.drop(col, axis=1)
-            print(f"{col} is dropped!")
+
+def select_columns(df,
+                   by_num=False,
+                   num=10,
+                   by_cols=False,
+                   cols={"health": True, "tree_dbh": False}
+                   ):
+    if by_cols:
+        use_cols = []
+        for key in cols:
+            if cols[key]:
+                use_cols.append(key)
+        df = df[use_cols]
+        for col in df.columns:
+            if col not in use_cols:
+                print(f"{col} is dropped!")
+    elif by_num:
+        for col in df.columns:
+            if len(df[col].unique()) >= num:
+                df = df.drop(col, axis=1)
+                print(f"{col} is dropped!")
     return df
 
-def processing():
+
+def processing(not_process=False):
     train = open_train()
     test = open_test()
     df = concat_train_test(train, test)
-    df = get_ymd(df)
-    df = curb_loc(df)
-    df = steward(df)
-    df = guards(df)
-    df = sidewalk(df)
-    df = user_type(df)
-    df = problems(df)
-    df = problems_category(df)
-    df = spc_common(df)
-    df = spc_latin(df)
-    df = nta(df)
-    df = nta_name(df)
-    df = boroname(df)
-    df = boro_ct(df)
-    df = zip_city(df)
-    df = select_columns(df, np.inf)
-    return df
+    if not_process:
+        return df
+    else:
+        df = health(df)
+        df = get_ymd(df)
+        df = tree_dbh(df)
+        df = season(df)
+        df = curb_loc(df)
+        df = steward(df)
+        df = guards(df)
+        df = sidewalk(df)
+        df = user_type(df)
+        df = staff(df)
+        df = problems(df)
+        df = problems_category(df)
+        df = spc_common(df)
+        df = spc_latin(df)
+        df = nta(df)
+        df = nta_name(df)
+        df = boroname(df)
+        df = boro_ct(df)
+        df = zip_city(df)
+        cols = {'tree_dbh': True,
+                'curb_loc': True,
+                'health': True,
+                'steward': True,
+                'guards': True,
+                'sidewalk': True,
+                'user_type': True,
+                'spc_common': True,
+                'spc_latin': True,
+                'nta': True,
+                'borocode': True,
+                'boro_ct': True,
+                'boroname': False,
+                'zip_city': True,
+                'cb_num': True,
+                'st_senate': False,
+                'st_assem': False,
+                'cncldist': True,
+                'created_year': True,
+                'created_date': False,
+                'season': True,
+                'staff': True,
+                'problems_Stones': True,
+                'problems_Branch': True,
+                'problems_Lights': True,
+                'problems_TrunkOther': True,
+                'problems_Wires': True,
+                'problems_Rope': True,
+                'problems_Metal': True,
+                'problems_Grates': True,
+                'problems_RootOther': True,
+                'problems_BranchOther': True,
+                'problems_Trunk': True,
+                'problems_Sneakers': True}
+        df = select_columns(df, by_cols=True, cols=cols)
+        return df
 
 
 def RFC(df_concat):
@@ -216,12 +325,12 @@ def RFC(df_concat):
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
     pred2 = pred.tolist()
-    print(f"0:{pred2.count(0)}")
-    print(f"1:{pred2.count(1)}")
-    print(f"2:{pred2.count(2)}")
+    print(f"Poor:{pred2.count(0)}")
+    print(f"Fair:{pred2.count(1)}")
+    print(f"Good:{pred2.count(2)}")
     # score = accuracy_score(y_test, pred)
     score = f1_score(y_test, pred, average='macro')
-    print(f"正解率：{score * 100}%")
+    print(f"F1 Score：{score * 100:.5f}%")
 
 
 def output(df_concat):
@@ -233,13 +342,19 @@ def output(df_concat):
     model = RandomForestClassifier(random_state=42)
     model.fit(x, Y)
     pred = model.predict(x_test)
-
+    pred2 = []
+    for i in range(len(pred)):
+        if pred[i] == 0:
+            pred2.append(2)
+        elif pred[i] == 1:
+            pred2.append(0)
+        else:
+            pred2.append(1)
     sample_submit = open_sub()
-    sample_submit[1] = pred.astype(int)
-    pred2 = pred.tolist()
-    print(f"sub0:{pred2.count(0)}")
-    print(f"sub1:{pred2.count(1)}")
-    print(f"sub2:{pred2.count(2)}")
+    sample_submit[1] = pred2
+    print(f"Poor:{pred2.count(2)}")
+    print(f"Fair:{pred2.count(0)}")
+    print(f"Good:{pred2.count(1)}")
     sample_submit.to_csv('submission.csv', header=None)
 
 

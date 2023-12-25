@@ -15,7 +15,8 @@ from test import processing
 # for col in train.columns:
 #     print(col, list(train[col].unique()))
 
-df = processing()
-for col in df.columns:
-    print(col, list(df[col].unique()))
+df = processing(not_process=False)
+# for col in df.columns:
+    # print(col, list(df[col].unique()))
+print(df.columns)
 

@@ -493,9 +493,8 @@ def select_columns_RFC(df, cnt=20):
             max_cols = temp_cols
             temp_cols = temp_cols_next
             other_cols = other_cols_next
-        print(f"{temp}/{cnt} done! \n Current score: {current_score*100:.3f} \n Max score: {max_score*100:.3f}")
-        if temp%100 == 0:
             print(temp_cols)
+        print(f"{temp}/{cnt} done! \n Current score: {current_score*100:.3f} \n Max score: {max_score*100:.3f}")
         temp += 1
     print(f"{max_score:.4f}")
     print(max_cols)

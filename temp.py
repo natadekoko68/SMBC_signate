@@ -2,3 +2,4 @@
 ['sidewalk', 'health', 'problems_Metal', 'st_senate', 'nta', 'tree_dbh', 'problems_Rope', 'boro_ct', 'steward', 'problems_num', 'guards', 'problems_Sneakers', 'zip_city']
 0.3369['health', 'problems_Stones', 'guards', 'steward', 'cb_num', 'tree_dbh', 'nta', 'problems_Metal', 'problems_Sneakers', 'boro_ct', 'created_year', 'staff', 'zip_city', 'problems_num', 'problems_Rope', 'sidewalk']
 33.615['guards', 'health', 'problems_Rope', 'nta', 'problems_Stones', 'problems_num', 'created_year', 'problems_Metal', 'boro_ct', 'zip_city', 'steward', 'sidewalk', 'tree_dbh', 'cb_num', 'problems_Sneakers', 'staff']
+33.722['health', 'problems_num', 'problems_Stones', 'staff', 'tree_dbh', 'problems_Sneakers', 'boro_ct', 'created_year', 'st_senate', 'nta', 'sidewalk', 'problems_Rope', 'problems_Metal', 'guards', 'cb_num']

@@ -1,3 +1,5 @@
+import random
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -443,6 +445,50 @@ def closs_RFC(df):
     print(f'Cross-Validation scores: {scores}')
     print(f'Average score: {np.mean(scores):.3f}')
     return np.mean(scores)
+
+def change_col_col(temp_cols,other_cols,target="health"):
+    if np.random.rand() < 0.5:
+        c = random.choice(temp_cols)
+        if c == target:
+            return temp_cols, other_cols
+        temp_cols.remove(c)
+        other_cols.append(c)
+    else:
+        c = random.choice(other_cols)
+        other_cols.remove(c)
+        temp_cols.append(c)
+    return temp_cols, other_cols
+
+def select_columns_RFC(df,cnt=10):
+    cols = list(df.columns)
+    target = "health"
+    temp_cols = random.sample(cols,10)
+    other_cols = []
+    if target not in temp_cols:
+        temp_cols.append(target)
+    for key in cols:
+        if key not in temp_cols:
+            other_cols.append(key)
+    df_temp = df[temp_cols]
+    max_score = closs_RFC(df_temp)
+    max_cols = temp_cols
+    temp = 1
+    while temp <= cnt:
+        temp_cols, other_cols = change_col_col(temp_cols,other_cols)
+        df_temp = df[temp_cols]
+        if max_score < closs_RFC(df_temp):
+            max_score = closs_RFC(df_temp)
+            max_cols = temp_cols
+    print(f"{max_score:.4f}")
+    print(max_cols)
+    return df[max_cols]
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     # scores = []

@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import cross_val_score
 
 
 def open_train():
@@ -107,9 +108,8 @@ def staff(df):
 
 
 def guards(df):
-    guard_labels = LabelEncoder()
     df.loc[df["guards"].isna(), "guards"] = "Unsure"
-    df["guards"] = guard_labels.fit_transform(df["guards"])
+    df["guards"] = df["guards"].replace({'Helpful': 1, 'Harmful': -1, 'Unsure': 0})
     return df
 
 
@@ -137,8 +137,9 @@ def problems(df):
             temp = ""
             for i in range(len(key)):
                 if key[i] == key[i].upper():
-                    if (temp != "") and (key[i] != "O"):
-                        lst.append(temp)
+                    if (temp != ""):
+                        if temp != "Other":
+                            lst.append(temp)
                         temp = ""
                 temp += key[i]
             lst.append(temp)
@@ -146,12 +147,12 @@ def problems(df):
             return lst
 
     df.loc[:, "problems"] = df.loc[:, "problems"].apply(get_problems)
+    df.loc[:, "problems_num"] = df.loc[:, "problems"].apply(lambda x: len(x))
     return df
 
 
 def problems_category(df):
-    labels = ['Stones', 'Branch', 'Lights', 'TrunkOther', 'Wires', 'Rope', 'Metal', 'Grates', 'RootOther',
-              'BranchOther', 'Trunk', 'Sneakers']
+    labels = ['Stones', 'Branch', 'Lights', 'Wires', 'Rope', 'Metal', 'Grates', 'Trunk', 'Sneakers']
     for label in labels:
         df["problems_" + label] = 0
         for i in range(len(df)):
@@ -252,6 +253,9 @@ def select_columns(df,
     return df
 
 
+from tools.select_columns import select_columns_random
+
+dics = []
 def processing(not_process=False):
     train = open_train()
     test = open_test()
@@ -278,41 +282,114 @@ def processing(not_process=False):
         df = boroname(df)
         df = boro_ct(df)
         df = zip_city(df)
-        cols = {'tree_dbh': True,
-                'curb_loc': True,
-                'health': True,
-                'steward': True,
-                'guards': True,
-                'sidewalk': True,
-                'user_type': True,
-                'spc_common': True,
-                'spc_latin': True,
-                'nta': True,
-                'borocode': True,
-                'boro_ct': True,
-                'boroname': False,
-                'zip_city': True,
-                'cb_num': True,
-                'st_senate': False,
-                'st_assem': False,
-                'cncldist': True,
-                'created_year': True,
+        cols = {'boro_ct': False,
+                'borocode': False,
+                'boroname': True,
+                'cb_num': False,
+                'cncldist': False,
                 'created_date': False,
-                'season': True,
-                'staff': True,
-                'problems_Stones': True,
+                'created_year': True,
+                'curb_loc': False,
+                'guards': True,
+                'health': True,
+                'nta': False,
                 'problems_Branch': True,
-                'problems_Lights': True,
-                'problems_TrunkOther': True,
-                'problems_Wires': True,
-                'problems_Rope': True,
-                'problems_Metal': True,
-                'problems_Grates': True,
-                'problems_RootOther': True,
                 'problems_BranchOther': True,
+                'problems_Grates': True,
+                'problems_Lights': True,
+                'problems_Metal': True,
+                'problems_RootOther': True,
+                'problems_Rope': False,
+                'problems_Sneakers': True,
+                'problems_Stones': False,
                 'problems_Trunk': True,
-                'problems_Sneakers': True}
+                'problems_TrunkOther': False,
+                'problems_Wires': True,
+                'problems_num': True,
+                'season': False,
+                'sidewalk': True,
+                'spc_common': True,
+                'spc_latin': False,
+                'st_assem': True,
+                'st_senate': True,
+                'staff': True,
+                'steward': True,
+                'tree_dbh': False,
+                'user_type': False,
+                'zip_city': False}
+        cols = {'boro_ct': True,
+ 'borocode': True,
+ 'boroname': True,
+ 'cb_num': False,
+ 'cncldist': True,
+ 'created_date': False,
+ 'created_year': True,
+ 'curb_loc': False,
+ 'guards': False,
+ 'health': True,
+ 'nta': False,
+ 'problems_Branch': True,
+ 'problems_Grates': False,
+ 'problems_Lights': True,
+ 'problems_Metal': True,
+ 'problems_Rope': True,
+ 'problems_Sneakers': True,
+ 'problems_Stones': False,
+ 'problems_Trunk': False,
+ 'problems_Wires': True,
+ 'problems_num': False,
+ 'season': True,
+ 'sidewalk': True,
+ 'spc_common': True,
+ 'spc_latin': False,
+ 'st_assem': True,
+ 'st_senate': True,
+ 'staff': False,
+ 'steward': True,
+ 'tree_dbh': False,
+ 'user_type': False,
+ 'zip_city': True}
+        cols = {'tree_dbh': True, 'curb_loc': False, 'health': True, 'steward': True, 'guards': True, 'sidewalk': True, 'user_type': False, 'spc_common': False, 'spc_latin': False, 'nta': True, 'borocode': False, 'boro_ct': True, 'boroname': False, 'zip_city': True, 'cb_num': True, 'st_senate': True, 'st_assem': False, 'cncldist': False, 'created_year': True, 'created_date': False, 'season': False, 'staff': True, 'problems_num': True, 'problems_Stones': True, 'problems_Branch': False, 'problems_Lights': False, 'problems_Wires': False, 'problems_Rope': True, 'problems_Metal': True, 'problems_Grates': False, 'problems_Trunk': False, 'problems_Sneakers': True}
+
+        # cols = {'tree_dbh': True,
+        #         'curb_loc': True,
+        #         'health': True,
+        #         'steward': True,
+        #         'guards': True,
+        #         'sidewalk': True,
+        #         'user_type': True,
+        #         'spc_common': False,
+        #         'spc_latin': False,
+        #         'nta': True,
+        #         'borocode': True,
+        #         'boro_ct': False,
+        #         'boroname': False,
+        #         'zip_city': False,
+        #         'cb_num': False,
+        #         'st_senate': False,
+        #         'st_assem': False,
+        #         'cncldist': False,
+        #         'created_year': True,
+        #         'created_date': False,
+        #         'season': True,
+        #         'staff': True,
+        #         'problems_Stones': True,
+        #         'problems_Branch': True,
+        #         'problems_Lights': True,
+        #         'problems_TrunkOther': True,
+        #         'problems_Wires': True,
+        #         'problems_Rope': True,
+        #         'problems_Metal': True,
+        #         'problems_Grates': True,
+        #         'problems_RootOther': True,
+        #         'problems_BranchOther': True,
+        #         'problems_Trunk': True,
+        #         'problems_Sneakers': True,
+        #         "problems_num": True,
+        #         }
         df = select_columns(df, by_cols=True, cols=cols)
+        # df, dic = select_columns_random(df)
+        # dics.append(dic)
         return df
 
 
@@ -330,7 +407,8 @@ def RFC(df_concat):
     print(f"Good:{pred2.count(2)}")
     # score = accuracy_score(y_test, pred)
     score = f1_score(y_test, pred, average='macro')
-    print(f"F1 Score：{score * 100:.5f}%")
+    print(f"F1 Score：{score * 100:.3f}%")
+    return score
 
 
 def output(df_concat):
@@ -357,8 +435,39 @@ def output(df_concat):
     print(f"Good:{pred2.count(1)}")
     sample_submit.to_csv('submission.csv', header=None)
 
+def closs_RFC(df):
+    model = RandomForestClassifier(random_state=42)
+    train, test = split_train_test(df, train_size=get_train_size())
+    Y, x = split_target(train)
+    scores = cross_val_score(model, np.array(x), np.array(Y), scoring="f1_macro", cv=10)
+    print(f'Cross-Validation scores: {scores}')
+    print(f'Average score: {np.mean(scores):.3f}')
+    return np.mean(scores)
 
 if __name__ == "__main__":
+    # scores = []
+    # for i in range(10):
+    #     print(f"試行: {i+1}回目")
+    #     df_concat = processing()
+    #     score = RFC(df_concat)
+    #     scores.append(score)
+    # print(scores)
+
+    # scores = []
+    # for i in range(10):
+    #     df_concat = processing()
+    #     score = closs_RFC(df_concat)
+    #     scores.append(score)
+    #     print(f"試行: {i+1}回目 {score:.3f}")
+    # print(scores)
+    # d = np.argmax(scores)
+    # print(f"MaxScore: {scores[d]}")
+    # print(dics[d])
+    # print(dics)
+
+    # df_concat = processing()
+    # closs_RFC(df_concat)
+
     df_concat = processing()
     RFC(df_concat)
     output(df_concat)

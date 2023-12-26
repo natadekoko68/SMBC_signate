@@ -16,7 +16,10 @@ from test import processing
 #     print(col, list(train[col].unique()))
 
 df = processing(not_process=False)
-# for col in df.columns:
-    # print(col, list(df[col].unique()))
-print(df.columns)
+for col in df.columns:
+    print(col, list(df[col].unique()))
+# # print(df.columns)
+
+
+
 

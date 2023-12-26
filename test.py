@@ -437,18 +437,28 @@ def output(df_concat):
     print(f"Good:{pred2.count(1)}")
     sample_submit.to_csv('submission.csv', header=None)
 
-def closs_RFC(df,verbose=False):
+def closs_RFC(df,verbose=False,cv=5):
     model = RandomForestClassifier(random_state=42)
     train, test = split_train_test(df, train_size=get_train_size())
     Y, x = split_target(train)
-    scores = cross_val_score(model, np.array(x), np.array(Y), scoring="f1_macro", cv=10)
+    scores = cross_val_score(model, np.array(x), np.array(Y), scoring="f1_macro", cv=cv)
     if verbose:
         print(f'Cross-Validation scores: {scores}')
         print(f'Average score: {np.mean(scores):.3f}')
     return np.mean(scores)
 
-def change_col_col(temp_cols,other_cols,target="health"):
-    if np.random.rand() < 0.5:
+def change_col_col(temp_cols,other_cols,target="health",n=10):
+    if (np.random.rand() <= 1/(2*n+1)):
+        cols = temp_cols + other_cols
+        temp_cols = random.sample(cols, random.randint(1, len(cols)))
+        other_cols = []
+        if target not in temp_cols:
+            temp_cols.append(target)
+        for key in cols:
+            if key not in temp_cols:
+                other_cols.append(key)
+        return temp_cols, other_cols
+    elif (1/(2*n+1) < np.random.rand() <= (n+1)/(2*n+1)) or (len(other_cols) == 0):
         c = random.choice(temp_cols)
         if c == target:
             return temp_cols, other_cols
@@ -463,7 +473,7 @@ def change_col_col(temp_cols,other_cols,target="health"):
 def select_columns_RFC(df, cnt=20):
     cols = list(df.columns)
     target = "health"
-    temp_cols = random.sample(cols,10)
+    temp_cols = random.sample(cols,random.randint(1, len(cols)))
     other_cols = []
     if target not in temp_cols:
         temp_cols.append(target)
@@ -475,14 +485,15 @@ def select_columns_RFC(df, cnt=20):
     max_cols = temp_cols
     temp = 1
     while temp <= cnt:
-        print(f"processing No.{temp}")
         temp_cols_next, other_cols_next = change_col_col(temp_cols, other_cols)
         df_temp = df[temp_cols_next]
-        if max_score < closs_RFC(df_temp):
-            max_score = closs_RFC(df_temp)
+        current_score = closs_RFC(df_temp)
+        if max_score < current_score:
+            max_score = current_score
             max_cols = temp_cols
             temp_cols = temp_cols_next
             other_cols = other_cols_next
+        print(f"{temp}/{cnt} done! \n Current score: {current_score*100:.3f} \n Max score: {max_score*100:.3f}")
         temp += 1
     print(f"{max_score:.4f}")
     print(max_cols)

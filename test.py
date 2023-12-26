@@ -437,13 +437,14 @@ def output(df_concat):
     print(f"Good:{pred2.count(1)}")
     sample_submit.to_csv('submission.csv', header=None)
 
-def closs_RFC(df):
+def closs_RFC(df,verbose=False):
     model = RandomForestClassifier(random_state=42)
     train, test = split_train_test(df, train_size=get_train_size())
     Y, x = split_target(train)
     scores = cross_val_score(model, np.array(x), np.array(Y), scoring="f1_macro", cv=10)
-    print(f'Cross-Validation scores: {scores}')
-    print(f'Average score: {np.mean(scores):.3f}')
+    if verbose:
+        print(f'Cross-Validation scores: {scores}')
+        print(f'Average score: {np.mean(scores):.3f}')
     return np.mean(scores)
 
 def change_col_col(temp_cols,other_cols,target="health"):
@@ -459,7 +460,7 @@ def change_col_col(temp_cols,other_cols,target="health"):
         temp_cols.append(c)
     return temp_cols, other_cols
 
-def select_columns_RFC(df,cnt=10):
+def select_columns_RFC(df, cnt=20):
     cols = list(df.columns)
     target = "health"
     temp_cols = random.sample(cols,10)
@@ -474,11 +475,15 @@ def select_columns_RFC(df,cnt=10):
     max_cols = temp_cols
     temp = 1
     while temp <= cnt:
-        temp_cols, other_cols = change_col_col(temp_cols,other_cols)
-        df_temp = df[temp_cols]
+        print(f"processing No.{temp}")
+        temp_cols_next, other_cols_next = change_col_col(temp_cols, other_cols)
+        df_temp = df[temp_cols_next]
         if max_score < closs_RFC(df_temp):
             max_score = closs_RFC(df_temp)
             max_cols = temp_cols
+            temp_cols = temp_cols_next
+            other_cols = other_cols_next
+        temp += 1
     print(f"{max_score:.4f}")
     print(max_cols)
     return df[max_cols]

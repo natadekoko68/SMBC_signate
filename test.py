@@ -503,34 +503,8 @@ def select_columns_RFC(df, cnt=20):
 
 
 
-
-
-
-
 if __name__ == "__main__":
-    # scores = []
-    # for i in range(10):
-    #     print(f"試行: {i+1}回目")
-    #     df_concat = processing()
-    #     score = RFC(df_concat)
-    #     scores.append(score)
-    # print(scores)
-
-    # scores = []
-    # for i in range(10):
-    #     df_concat = processing()
-    #     score = closs_RFC(df_concat)
-    #     scores.append(score)
-    #     print(f"試行: {i+1}回目 {score:.3f}")
-    # print(scores)
-    # d = np.argmax(scores)
-    # print(f"MaxScore: {scores[d]}")
-    # print(dics[d])
-    # print(dics)
-
-    # df_concat = processing()
-    # closs_RFC(df_concat)
-
     df_concat = processing()
-    RFC(df_concat)
-    output(df_concat)
+    print(df_concat.columns)
+    # RFC(df_concat)
+    # output(df_concat)

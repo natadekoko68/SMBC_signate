@@ -62,7 +62,7 @@ def closs_RFC(df,verbose=False,cv=5):
 def change_col_col(temp_cols,other_cols, current_score, target="health",n=10,objective_score=32):
     if objective_score-1 >= current_score:
         cols = temp_cols + other_cols
-        temp_cols = random.sample(cols, random.randint(1, len(cols)))
+        temp_cols = random.sample(cols, random.randint(3, len(cols)))
         other_cols = []
         if target not in temp_cols:
             temp_cols.append(target)

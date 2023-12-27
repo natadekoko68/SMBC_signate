@@ -18,7 +18,6 @@ from test import processing
 df = processing(not_process=False)
 for col in df.columns:
     print(col, list(df[col].unique()))
-# # print(df.columns)
 
 
 

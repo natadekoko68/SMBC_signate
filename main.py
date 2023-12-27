@@ -1,4 +1,5 @@
-from test import processing, select_columns_RFC
+from preprocessing.arrangement import processing
+from estimate.estimator import select_columns_RFC
 
 if __name__ == '__main__':
     df_concat = processing()

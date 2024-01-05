@@ -101,3 +101,6 @@ int
 23	
 int
 市議会の地区番号
+
+Total maxscore: 33.8620
+['problems_Stones', 'sidewalk', 'guards', 'steward', 'created_year', 'cb_num', 'problems_Metal', 'tree_dbh', 'staff', 'problems_Sneakers', 'problems_num', 'health']

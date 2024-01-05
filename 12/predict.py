@@ -28,25 +28,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_
 # y_pred = rfc.predict(X_test)
 # print(f"score is {f1_score(y_test, y_pred, average="macro"):.4f}")
 
-param_grid = {"weights": ["uniform", "distance"],
+param_grid = {"n_neighbors":[1,3,5,7,9],
+              "weights": ["uniform", "distance"],
               "algorithm": ["auto", "ball_tree"],
-              "leaf_size": [8, 9, 10, 11, 12],
-              "p": [1, 3],
+              "leaf_size": [1, 2, 3],
+              "p": [1, 2, 3, 4],
               }
-param_grid = {"weights": ["distance"],
-              "algorithm": ["auto"],
-              "leaf_size": [1, 2],
-              "p": [4, 5],
-              }
+
 grid_search = GridSearchCV(estimator=KNeighborsClassifier(),
                            param_grid=param_grid,
-                           cv=10,
+                           cv=2,
                            verbose=4,
                            scoring='f1_macro',
                            n_jobs=-1)
 
-# grid_search.fit(X, y)
-# print("Best Parameters:", grid_search.best_params_)
+grid_search.fit(X, y)
+print("Best Parameters:", grid_search.best_params_)
 
 """mybest
 # knc = KNeighborsClassifier(n_neighbors=1, algorithm='ball_tree',
@@ -54,15 +51,15 @@ grid_search = GridSearchCV(estimator=KNeighborsClassifier(),
 #                             p=3, weights="uniform"
 #                             )
 """
-knc = KNeighborsClassifier(algorithm='auto',
-                           leaf_size=1,
-                           n_jobs=-1,
-                           p=4,
-                           weights="distance"
-                           )
-knc.fit(X, y)
-y_pred = knc.predict(test.drop(["health"], axis=1)).astype(int)
-
-df_submission = pd.read_csv("/Users/kotaro/PycharmProjects/SMBC_signate/output/submission.csv", header=None)
-df_submission[1] = y_pred
-df_submission.to_csv("/Users/kotaro/PycharmProjects/SMBC_signate/output/sub_knc_colselected.csv", header=None, index=None)
+# knc = KNeighborsClassifier(algorithm='ball_tree',
+#                            leaf_size=3,
+#                            n_jobs=-1,
+#                            p=3,
+#                            weights="uniform"
+#                            )
+# knc.fit(X, y)
+# y_pred = knc.predict(test.drop(["health"], axis=1)).astype(int)
+#
+# df_submission = pd.read_csv("/Users/kotaro/PycharmProjects/SMBC_signate/output/submission.csv", header=None)
+# df_submission[1] = y_pred
+# df_submission.to_csv("/Users/kotaro/PycharmProjects/SMBC_signate/output/sub_knc_colselected.csv", header=None, index=None)
